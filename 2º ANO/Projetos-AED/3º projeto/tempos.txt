@@ -1,0 +1,158 @@
+Size: 20000
+Insertion Sort A: 0.000052
+Insertion Sort B: 0.387042
+Insertion Sort C: 0.188101
+
+
+Heap Sort A: 0.001995
+Heap Sort B: 0.001984
+Heap Sort C: 0.002536
+
+
+Quick Sort A: 0.000635
+Quick Sort B: 0.000377
+Quick Sort C: 0.002225
+
+
+Size: 30000
+Insertion Sort A: 0.000034
+Insertion Sort B: 0.834834
+Insertion Sort C: 0.415286
+
+
+Heap Sort A: 0.003150
+Heap Sort B: 0.006153
+Heap Sort C: 0.004583
+
+
+Quick Sort A: 0.000501
+Quick Sort B: 0.000466
+Quick Sort C: 0.002912
+
+
+Size: 50000
+Insertion Sort A: 0.000062
+Insertion Sort B: 2.331330
+Insertion Sort C: 1.165486
+
+
+Heap Sort A: 0.005263
+Heap Sort B: 0.006977
+Heap Sort C: 0.009787
+
+
+Quick Sort A: 0.000902
+Quick Sort B: 0.000847
+Quick Sort C: 0.004788
+
+
+Size: 60000
+Insertion Sort A: 0.000081
+Insertion Sort B: 3.308269
+Insertion Sort C: 1.823984
+
+
+Heap Sort A: 0.008549
+Heap Sort B: 0.007388
+Heap Sort C: 0.010364
+
+
+Quick Sort A: 0.001166
+Quick Sort B: 0.001462
+Quick Sort C: 0.005949
+
+
+Size: 70000
+Insertion Sort A: 0.000090
+Insertion Sort B: 4.708941
+Insertion Sort C: 2.274271
+
+
+Heap Sort A: 0.007550
+Heap Sort B: 0.009782
+Heap Sort C: 0.010726
+
+
+Quick Sort A: 0.001077
+Quick Sort B: 0.001422
+Quick Sort C: 0.006998
+
+
+Size: 80000
+Insertion Sort A: 0.000096
+Insertion Sort B: 5.915281
+Insertion Sort C: 2.975742
+
+
+Heap Sort A: 0.009900
+Heap Sort B: 0.010763
+Heap Sort C: 0.011718
+
+
+Quick Sort A: 0.001331
+Quick Sort B: 0.003099
+Quick Sort C: 0.009547
+
+
+Size: 100000
+Insertion Sort A: 0.000123
+Insertion Sort B: 9.193215
+Insertion Sort C: 4.594896
+
+
+Heap Sort A: 0.013557
+Heap Sort B: 0.010889
+Heap Sort C: 0.016662
+
+
+Quick Sort A: 0.001550
+Quick Sort B: 0.002001
+Quick Sort C: 0.010883
+
+
+Size: 250000
+Insertion Sort A: 0.000259
+Insertion Sort B: 60.640259
+Insertion Sort C: 29.773556
+
+
+Heap Sort A: 0.032316
+Heap Sort B: 0.030963
+Heap Sort C: 0.042092
+
+
+Quick Sort A: 0.003918
+Quick Sort B: 0.004198
+Quick Sort C: 0.028441
+
+
+Size: 500000
+Insertion Sort A: 0.000549
+Insertion Sort B: 236.306385
+Insertion Sort C: 116.052308
+
+
+Heap Sort A: 0.062961
+Heap Sort B: 0.067759
+Heap Sort C: 0.092738
+
+
+Quick Sort A: 0.007807
+Quick Sort B: 0.009218
+Quick Sort C: 0.060155
+
+
+Size: 1000000
+Insertion Sort A: 0.001150
+Insertion Sort B: 956.207584
+Insertion Sort C: 479.080957
+
+
+Heap Sort A: 0.138808
+Heap Sort B: 0.140077
+Heap Sort C: 0.192442
+
+
+Quick Sort A: 0.016541
+Quick Sort B: 0.020108
+Quick Sort C: 0.116820

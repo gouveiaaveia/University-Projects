@@ -1,0 +1,19 @@
+Clientes
+Ze/123123123/madeira
+Manel/123321123/portugal continental
+Joao/000000011/açores
+-
+Produtos
+alimentar/001/maçã/maçã preta/100.0//ISO22000,GMP
+alimentar/111/Papa Figos/vinho muito bom/8.5/vinho/
+alimentar/123/manteiga/manteiga da boa/2.5//ISO22000,FSSC22000,HACCP,GMP
+biologico/011/pera/pera azul/90.0/congelados/
+farmacia/021/spidifen/para a dor de cabeça/5.0/Bebes/
+farmacia/523/ração/comida animal/10/animais/
+prescrito/061/testosterona/para ficar grande/500.0/Andre/
+-
+Fatura
+001/123123123/02-02-2024;001,5/011,1
+011/123123123/03-09-2020;021,8/001,1/111,1
+111/123321123/08-08-2008;021,9/001,5/011,8/123,6
+112/000000011/05-05-2024;001,6/011,3/061,2/021,1

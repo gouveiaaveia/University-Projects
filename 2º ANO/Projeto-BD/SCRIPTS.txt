@@ -1,0 +1,299 @@
+SCRIPTS
+
+
+CREATE TABLE course (
+	course_code SERIAL,
+	course_name VARCHAR(512) NOT NULL,
+	PRIMARY KEY(course_code)
+);
+
+CREATE TABLE coordinator_instructor (
+	coordinator_number	 SERIAL NOT NULL,
+	professor_person_id INTEGER,
+	PRIMARY KEY(professor_person_id)
+);
+
+CREATE TABLE person (
+	id	 SERIAL,
+	name	 VARCHAR(512),
+	cc	 VARCHAR(512) NOT NULL,
+	age	 INTEGER NOT NULL,
+	district VARCHAR(512) NOT NULL,
+	email	 VARCHAR(512),
+	password VARCHAR(512) NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE assistent_instructor (
+	assistent_number	 SERIAL NOT NULL,
+	professor_person_id INTEGER,
+	PRIMARY KEY(professor_person_id)
+);
+
+CREATE TABLE student (
+	student_number SERIAL NOT NULL,
+	account_value	 FLOAT(8) NOT NULL,
+	total_debt	 FLOAT(8),
+	person_id	 INTEGER,
+	PRIMARY KEY(person_id)
+);
+
+CREATE TABLE class (
+	class_number SERIAL,
+	type	 VARCHAR(512) NOT NULL,
+	classroom_id INTEGER NOT NULL,
+	PRIMARY KEY(class_number)
+);
+
+CREATE TABLE building (
+	id	 SERIAL,
+	name VARCHAR(512) NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE administrative_staff (
+	staff_number SERIAL NOT NULL,
+	person_id	 INTEGER,
+	PRIMARY KEY(person_id)
+);
+
+CREATE TABLE student_degree (
+	active		 BOOL,
+	enrollement_date	 DATE,
+	degree_id	 INTEGER,
+	student_person_id INTEGER,
+	PRIMARY KEY(degree_id,student_person_id)
+);
+
+CREATE TABLE grade (
+	grade				 INTEGER NOT NULL,
+	grade_date			 DATE NOT NULL,
+	period_id			 INTEGER,
+	student_person_id		 INTEGER,
+	course_edition_edition_id	 BIGINT,
+	course_edition_course_course_code INTEGER,
+	PRIMARY KEY(period_id,student_person_id,course_edition_edition_id,course_edition_course_course_code)
+);
+
+CREATE TABLE extracurricular_activities (
+	id		 SERIAL,
+	name		 VARCHAR(512) NOT NULL,
+	type		 VARCHAR(512) NOT NULL,
+	activity_value FLOAT(8) NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE financial_transations (
+	transaction_number SERIAL,
+	transation_value	 FLOAT(8) NOT NULL,
+	transation_date	 DATE NOT NULL,
+	type		 VARCHAR(512) NOT NULL,
+	student_person_id	 INTEGER NOT NULL,
+	PRIMARY KEY(transaction_number)
+);
+
+CREATE TABLE classroom (
+	id		 SERIAL,
+	room	 INTEGER NOT NULL,
+	capacity	 INTEGER NOT NULL,
+	location	 VARCHAR(512) NOT NULL,
+	building_id INTEGER NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE degree (
+	id		 SERIAL,
+	name	 VARCHAR(512) NOT NULL,
+	degree_value INTEGER NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE period (
+	id		 SERIAL,
+	type		 VARCHAR(512) NOT NULL,
+	period_date_start DATE NOT NULL,
+	period_date_end	 DATE NOT NULL,
+	semestre		 INTEGER NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE timetable (
+	week_day				 VARCHAR(512),
+	start_time			 INTEGER,
+	duration				 INTEGER,
+	class_class_number		 INTEGER,
+	course_edition_edition_id	 BIGINT,
+	course_edition_course_course_code INTEGER,
+	PRIMARY KEY(class_class_number,course_edition_edition_id,course_edition_course_course_code)
+);
+
+CREATE TABLE edition (
+	id		 BIGSERIAL,
+	edition_year INTEGER,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE course_edition (
+	id					 SERIAL,
+	capacity					 INTEGER NOT NULL,
+	edition_id				 BIGINT,
+	course_course_code			 INTEGER,
+	coordinator_instructor_professor_person_id INTEGER NOT NULL,
+	PRIMARY KEY(edition_id,course_course_code)
+);
+
+CREATE TABLE student_class (
+	student_person_id	 INTEGER,
+	class_class_number INTEGER,
+	PRIMARY KEY(student_person_id,class_class_number)
+);
+
+CREATE TABLE assistent_instructor_course_edition (
+	assistent_instructor_professor_person_id INTEGER,
+	course_edition_edition_id		 BIGINT,
+	course_edition_course_course_code	 INTEGER,
+	PRIMARY KEY(assistent_instructor_professor_person_id,course_edition_edition_id,course_edition_course_course_code)
+);
+
+CREATE TABLE degree_course (
+	degree_id		 INTEGER,
+	course_course_code INTEGER,
+	PRIMARY KEY(degree_id,course_course_code)
+);
+
+CREATE TABLE student_extracurricular_activities (
+	student_person_id		 INTEGER,
+	extracurricular_activities_id INTEGER,
+	PRIMARY KEY(student_person_id,extracurricular_activities_id)
+);
+
+CREATE TABLE course_course (
+	course_course_code	 INTEGER,
+	course_course_code1 INTEGER NOT NULL,
+	PRIMARY KEY(course_course_code)
+);
+
+ALTER TABLE coordinator_instructor ADD UNIQUE (coordinator_number);
+ALTER TABLE coordinator_instructor ADD CONSTRAINT coordinator_instructor_fk1 FOREIGN KEY (professor_person_id) REFERENCES person(id);
+ALTER TABLE person ADD UNIQUE (cc, email);
+ALTER TABLE assistent_instructor ADD UNIQUE (assistent_number);
+ALTER TABLE assistent_instructor ADD CONSTRAINT assistent_instructor_fk1 FOREIGN KEY (professor_person_id) REFERENCES person(id);
+ALTER TABLE student ADD UNIQUE (student_number);
+ALTER TABLE student ADD CONSTRAINT student_fk1 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE class ADD CONSTRAINT class_fk1 FOREIGN KEY (classroom_id) REFERENCES classroom(id);
+ALTER TABLE administrative_staff ADD UNIQUE (staff_number);
+ALTER TABLE administrative_staff ADD CONSTRAINT administrative_staff_fk1 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE student_degree ADD CONSTRAINT student_degree_fk1 FOREIGN KEY (degree_id) REFERENCES degree(id);
+ALTER TABLE student_degree ADD CONSTRAINT student_degree_fk2 FOREIGN KEY (student_person_id) REFERENCES student(person_id);
+ALTER TABLE grade ADD CONSTRAINT grade_fk1 FOREIGN KEY (period_id) REFERENCES period(id);
+ALTER TABLE grade ADD CONSTRAINT grade_fk2 FOREIGN KEY (student_person_id) REFERENCES student(person_id);
+ALTER TABLE grade ADD CONSTRAINT grade_fk3 FOREIGN KEY (course_edition_edition_id, course_edition_course_course_code) REFERENCES course_edition(edition_id, course_course_code);
+ALTER TABLE financial_transations ADD CONSTRAINT financial_transations_fk1 FOREIGN KEY (student_person_id) REFERENCES student(person_id);
+ALTER TABLE classroom ADD CONSTRAINT classroom_fk1 FOREIGN KEY (building_id) REFERENCES building(id);
+ALTER TABLE timetable ADD CONSTRAINT timetable_fk1 FOREIGN KEY (class_class_number) REFERENCES class(class_number);
+ALTER TABLE timetable ADD CONSTRAINT timetable_fk2 FOREIGN KEY (course_edition_edition_id, course_edition_course_course_code) REFERENCES course_edition(edition_id, course_course_code);
+ALTER TABLE course_edition ADD UNIQUE (id);
+ALTER TABLE course_edition ADD CONSTRAINT course_edition_fk1 FOREIGN KEY (edition_id) REFERENCES edition(id);
+ALTER TABLE course_edition ADD CONSTRAINT course_edition_fk2 FOREIGN KEY (course_course_code) REFERENCES course(course_code);
+ALTER TABLE course_edition ADD CONSTRAINT course_edition_fk3 FOREIGN KEY (coordinator_instructor_professor_person_id) REFERENCES coordinator_instructor(professor_person_id);
+ALTER TABLE student_class ADD CONSTRAINT student_class_fk1 FOREIGN KEY (student_person_id) REFERENCES student(person_id);
+ALTER TABLE student_class ADD CONSTRAINT student_class_fk2 FOREIGN KEY (class_class_number) REFERENCES class(class_number);
+ALTER TABLE assistent_instructor_course_edition ADD CONSTRAINT assistent_instructor_course_edition_fk1 FOREIGN KEY (assistent_instructor_professor_person_id) REFERENCES assistent_instructor(professor_person_id);
+ALTER TABLE assistent_instructor_course_edition ADD CONSTRAINT assistent_instructor_course_edition_fk2 FOREIGN KEY (course_edition_edition_id, course_edition_course_course_code) REFERENCES course_edition(edition_id, course_course_code);
+ALTER TABLE degree_course ADD CONSTRAINT degree_course_fk1 FOREIGN KEY (degree_id) REFERENCES degree(id);
+ALTER TABLE degree_course ADD CONSTRAINT degree_course_fk2 FOREIGN KEY (course_course_code) REFERENCES course(course_code);
+ALTER TABLE student_extracurricular_activities ADD CONSTRAINT student_extracurricular_activities_fk1 FOREIGN KEY (student_person_id) REFERENCES student(person_id);
+ALTER TABLE student_extracurricular_activities ADD CONSTRAINT student_extracurricular_activities_fk2 FOREIGN KEY (extracurricular_activities_id) REFERENCES extracurricular_activities(id);
+ALTER TABLE course_course ADD CONSTRAINT course_course_fk1 FOREIGN KEY (course_course_code) REFERENCES course(course_code);
+ALTER TABLE course_course ADD CONSTRAINT course_course_fk2 FOREIGN KEY (course_course_code1) REFERENCES course(course_code);
+
+
+
+
+CREATE OR REPLACE FUNCTION trg_after_student_degree_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO financial_transations (
+    transation_value,
+    transation_date,
+    type,
+    student_person_id
+  )
+  VALUES (
+    (SELECT degree_value
+     FROM degree
+     WHERE id = NEW.degree_id),
+    NEW.enrollement_date,
+    'degree_enrollment',
+    NEW.student_person_id
+  );
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DROP TRIGGER IF EXISTS trg_student_degree_insert
+  ON student_degree;
+
+
+CREATE TRIGGER trg_student_degree_insert
+AFTER INSERT ON student_degree
+FOR EACH ROW
+EXECUTE FUNCTION trg_after_student_degree_insert();
+
+
+
+CREATE OR REPLACE FUNCTION trg_after_student_activity_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO financial_transations (
+    transation_value,
+    transation_date,
+    type,
+    student_person_id
+  )
+  VALUES (
+    (SELECT activity_value
+     FROM extracurricular_activities
+     WHERE id = NEW.extracurricular_activities_id),
+    CURRENT_DATE,            
+    'activitie_enrollment',   
+    NEW.student_person_id    
+  );
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DROP TRIGGER IF EXISTS trg_after_student_activity_insert
+  ON student_extracurricular_activities;
+
+CREATE TRIGGER trg_after_student_activity_insert
+AFTER INSERT ON student_extracurricular_activities
+FOR EACH ROW
+EXECUTE FUNCTION trg_after_student_activity_insert();
+
+
+CREATE OR REPLACE FUNCTION decrement_course_edition_capacity()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- Atualiza a edição de curso correspondente à turma inserida
+  UPDATE course_edition ce
+  SET capacity = ce.capacity - 1
+  FROM timetable t
+  WHERE t.class_class_number = NEW.class_class_number
+    AND ce.edition_id   = t.course_edition_edition_id
+    AND ce.course_course_code = t.course_edition_course_course_code;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_decrement_capacity
+AFTER INSERT ON student_class
+FOR EACH ROW
+EXECUTE FUNCTION decrement_course_edition_capacity();
