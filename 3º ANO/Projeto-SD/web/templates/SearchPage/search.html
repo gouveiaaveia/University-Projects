@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Googol - Resultados</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/googolIcon.svg">
+    <link rel="stylesheet" href="/static/SearchPage/search.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="search-header">
+        <div>
+            <a href="/">
+                <img src="/static/assets/Googol.svg" alt="Googol" class="logo">
+            </a>
+            <form class="search-box" action="/search" method="get">
+                <input type="text" name="q" class="search-input" placeholder="Pesquisar..." value="{{ query }}">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <nav class="site-navigation">
+            <div class="header-container">
+                <a href="/index-link" class="nav-link">
+                    Index Links
+                </a>
+                <a href="/links-to" class="nav-link">
+                    Links to a Page
+                </a>
+                <a href="/stats" class="nav-link">Statistics</a>
+
+                {% if query %}
+                <button id="hn-index-btn" class="hn-btn" onclick="indexHackerNews()">
+                    <img src="/static/assets/hacker-news.png" alt="HN" class="hn-icon">
+                    Indexar Top Stories "{{ query }}"
+                </button>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Resultados -->
+    <main class="results-container">
+        
+        {% if query %}
+            {% if results %}
+                <p class="stats">A mostrar {{ inicio }}-{{ fim }} de {{ total }} resultados para "{{ query }}"</p>
+
+                <div class="results-list">
+                    <!-- AI Summary Box -->
+                    <div class="ai-summary-box" id="ai-summary-box">
+                        <div class="ai-summary-header">
+                            <i class="fas fa-magic"></i>
+                            <span>Resumo da IA</span>
+                        </div>
+                        <div class="ai-summary-content" id="ai-summary-content">
+                            <p class="ai-loading"><i class="fas fa-spinner fa-spin"></i> A carregar resumo de IA...</p>
+                        </div>
+                    </div>
+                    {% for result in results %}
+                    <div class="result-item">
+                        <a href="{{ result.url }}" class="result-title" target="_blank">
+                            {% if result.title %}{{ result.title }}{% else %}{{ result.url }}{% endif %}
+                        </a>
+                        <span class="result-url">{{ result.url }}</span>
+                        <p class="result-citation">{{ result.citation }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if total_pages > 1 %}
+                <div class="pagination">
+                    {% if page > 0 %}
+                        <a href="/search?q={{ query }}&p={{ page - 1 }}" class="page-btn">
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </a>
+                    {% else %}
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </button>
+                    {% endif %}
+
+                    <span class="page-info">Página {{ page + 1 }} de {{ total_pages }}</span>
+
+                    {% if has_more %}
+                        <a href="/search?q={{ query }}&p={{ page + 1 }}" class="page-btn">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <button class="page-btn" disabled>
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            {% else %}
+                <p class="stats">Nenhum resultado encontrado para "{{ query }}"</p>
+                <p class="no-results">Tente pesquisar por outras palavras.</p>
+            {% endif %}
+        {% else %}
+            <p class="stats">Introduza um termo de pesquisa.</p>
+        {% endif %}
+
+    </main>
+
+    <!-- Dados para o JavaScript -->
+    <script id="page-data" type="application/json">
+        {
+            "query": {{ query|tojson if query else '""' }},
+            "results": [
+                {% for result in results %}
+                {
+                    "title": {{ result.title|tojson }},
+                    "url": {{ result.url|tojson }},
+                    "citation": {{ result.citation|tojson }}
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ]
+        }
+    </script>
+
+    <script>
+        // Obter dados da página
+        const pageData = JSON.parse(document.getElementById('page-data').textContent);
+
+        // Função para indexar Top Stories do Hacker News
+        async function indexHackerNews() {
+            const query = pageData.query;
+            const btn = document.getElementById('hn-index-btn');
+            
+            // Desativar botão e mostrar loading
+            btn.disabled = true;
+            btn.innerHTML = 'A indexar...';
+            
+            try {
+                const response = await fetch('/api/hackernews-search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    btn.innerHTML = data.count + ' indexados!';
+                    btn.classList.add('hn-btn-success');
+                    showNotification(data.message, 'success');
+                    // Botão fica desativado permanentemente após sucesso
+                } else {
+                    btn.innerHTML = 'Erro - clica para tentar novamente';
+                    btn.classList.add('hn-btn-error');
+                    showNotification(data.message, 'error');
+                    // Apenas em caso de erro, reativar o botão
+                    btn.disabled = false;
+                }
+                
+            } catch (error) {
+                btn.innerHTML = 'Erro - clica para tentar novamente';
+                btn.classList.add('hn-btn-error');
+                showNotification('Erro ao contactar servidor', 'error');
+                // Apenas em caso de erro, reativar o botão
+                btn.disabled = false;
+            }
+        }
+        
+        // Função para mostrar notificação
+        function showNotification(message, type) {
+            // Remover notificação existente
+            const existing = document.querySelector('.hn-notification');
+            if (existing) existing.remove();
+            
+            const notification = document.createElement('div');
+            notification.className = 'hn-notification hn-notification-' + type;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+            
+            // Remover após 5 segundos
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        // Carregar resumo da IA automaticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const query = pageData.query;
+            const results = pageData.results;
+
+            if (query && results.length > 0) {
+                loadAISummary(query, results);
+            }
+        });
+
+        async function loadAISummary(query, results) {
+            const box = document.getElementById('ai-summary-box');
+            const content = document.getElementById('ai-summary-content');
+            
+            try {
+                const response = await fetch('/api/ai-summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query, results: results.slice(0, 5) })
+                });
+
+                const data = await response.json();
+                
+                if (data.summary && data.summary.trim()) {
+                    content.innerHTML = data.summary.replace(/\n/g, '<br>');
+                } else {
+                    box.style.display = 'none';
+                }
+
+            } catch (error) {
+                // Em caso de erro, esconde a caixa
+                box.style.display = 'none';
+                console.log('Erro ao carregar resumo IA:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>

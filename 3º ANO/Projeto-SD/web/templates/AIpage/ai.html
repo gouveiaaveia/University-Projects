@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Googol IA</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/googolIcon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/AIpage/ai.css">
+</head>
+<body>
+
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i></a>
+
+    <div class="container">
+        <div class="header">
+            <img src="/static/assets/Geminol.svg" alt="Geminol" class="logo">
+            <button class="new-chat-btn" onclick="newChat()">
+                <i class="fas fa-plus"></i> Nova Conversa
+            </button>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-box" id="chat-box">
+            <p class="empty-chat" id="empty-msg">Faça a sua pergunta para começar...</p>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-wrapper">
+            <input type="text" id="message-input" class="search-bar" placeholder="Escreve a tua mensagem..." autocomplete="off">
+            <button id="send-btn" onclick="sendMessage()" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        let conversationHistory = [];
+        let isGenerating = false;
+
+        const input = document.getElementById('message-input');
+        
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function newChat() {
+            conversationHistory = [];
+            document.getElementById('chat-box').innerHTML = '<p class="empty-chat" id="empty-msg">Faça a sua pergunta para começar...</p>';
+        }
+
+        async function sendMessage() {
+            const query = input.value.trim();
+            if (!query || isGenerating) return;
+
+            isGenerating = true;
+            const chatBox = document.getElementById('chat-box');
+            const emptyMsg = document.getElementById('empty-msg');
+            const sendBtn = document.getElementById('send-btn');
+            
+            // Esconder mensagem inicial
+            if (emptyMsg) emptyMsg.style.display = 'none';
+
+            // Adicionar mensagem do utilizador
+            chatBox.innerHTML += `
+                <div class="message user-message">
+                    <img src="/static/assets/person.png" alt="User" class="msg-icon">
+                    <span>${escapeHtml(query)}</span>
+                </div>
+            `;
+
+            // Guardar no histórico
+            conversationHistory.push({ role: 'user', content: query });
+
+            // Limpar input
+            input.value = '';
+            input.disabled = true;
+            sendBtn.disabled = true;
+
+            // Criar placeholder para resposta da IA
+            const responseId = 'response-' + Date.now();
+            chatBox.innerHTML += `
+                <div class="message ai-message">
+                    <img src="/static/assets/bot.svg.png" alt="Bot" class="msg-icon">
+                    <span id="${responseId}"><span class="typing-cursor"></span></span>
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            let aiResponse = '';
+
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: query,
+                        history: conversationHistory.slice(0, -1).slice(-10)
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                const outputEl = document.getElementById(responseId);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    aiResponse += chunk;
+                    outputEl.innerHTML = formatMessage(aiResponse) + '<span class="typing-cursor"></span>';
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+
+                // Remover cursor e guardar resposta
+                outputEl.innerHTML = formatMessage(aiResponse);
+                conversationHistory.push({ role: 'assistant', content: aiResponse });
+
+            } catch (error) {
+                document.getElementById(responseId).innerText = 'Erro ao contactar a IA. Tenta novamente.';
+            } finally {
+                isGenerating = false;
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatMessage(text) {
+            text = escapeHtml(text);
+            text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+    </script>
+</body>
+</html>

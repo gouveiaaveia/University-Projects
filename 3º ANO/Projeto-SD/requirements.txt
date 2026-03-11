@@ -1,0 +1,28 @@
+# Web Framework
+fastapi
+uvicorn[standard]
+websockets
+jinja2
+python-multipart
+
+# HTTP Client
+requests
+
+# gRPC
+grpcio
+grpcio-tools
+protobuf
+
+# Utilitários
+python-dotenv
+pybloom_live
+cachetools
+
+# Web Scraping
+beautifulsoup4
+lxml
+
+# IA
+google-generativeai
+groq
+httpx

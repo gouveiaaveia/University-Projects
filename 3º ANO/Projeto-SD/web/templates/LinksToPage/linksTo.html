@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Googol - Links para página</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/googolIcon.svg">
+    <link rel="stylesheet" href="/static/LinksToPage/linksTo.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/">
+                <img src="/static/assets/Googol.svg" alt="Googol" class="logo">
+            </a>
+        </div>
+        <nav class="site-navigation">
+            <a href="/index-link" class="nav-link">Index Links</a>
+            <a href="/links-to" class="nav-link active">Links to a Page</a>
+            <a href="/stats" class="nav-link">Statistics</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="search-section">
+            <h1 class="page-title">
+                Páginas que ligam para um URL
+            </h1>
+            <p class="page-subtitle">Descubra quais páginas contêm links para um URL específico</p>
+            
+            <form class="url-form" action="/links-to" method="get">
+                <div class="input-wrapper">
+                    <i class="fas fa-search input-icon"></i>
+                    <input 
+                        type="url" 
+                        name="url" 
+                        class="url-input" 
+                        placeholder="Introduza um URL (ex: https://exemplo.com)" 
+                        value="{{ target_url or '' }}"
+                        required
+                    >
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resultados -->
+        {% if target_url %}
+        <div class="results-section">
+            {% if links and links|length > 0 %}
+                <div class="results-header">
+                    <span>Encontradas <strong>{{ total_links }}</strong> página(s) que ligam para:</span>
+                    <a href="{{ target_url }}" target="_blank">{{ target_url }}</a>
+                </div>
+                
+                <div class="links-list">
+                    {% for link in links %}
+                    <div class="link-item">
+                        <div class="link-content">
+                            <a href="{{ link }}" class="link-url" target="_blank">{{ link }}</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginação -->
+                {% if total_pages > 1 %}
+                <div class="pagination">
+                    {% if page > 0 %}
+                        <a href="/links-to?url={{ target_url | urlencode }}&p={{ page - 1 }}" class="page-btn">
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </a>
+                    {% else %}
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </button>
+                    {% endif %}
+
+                    <span class="page-info">Página {{ page + 1 }} de {{ total_pages }}</span>
+
+                    {% if page < total_pages - 1 %}
+                        <a href="/links-to?url={{ target_url | urlencode }}&p={{ page + 1 }}" class="page-btn">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <button class="page-btn" disabled>
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="no-results">
+                    <h2>Nenhuma página encontrada</h2>
+                    <p>Não foram encontradas páginas que liguem para:</p>
+                    <p class="hint">Experimente pesquisar por outro URL ou indexe mais páginas.</p>
+                </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>Introduza um URL acima para descobrir quais páginas ligam para ele.</p>
+        </div>
+        {% endif %}
+    </main>
+</body>
+
+</html>

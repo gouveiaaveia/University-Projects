@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Ficheiros de estado (gerados em runtime)
+*.pkl
+*.log
+*.bin
+
+# Ambiente virtual
+.env
+.venv/
+env/
+venv/
+
+# Certificados HTTPS (regeneráveis)
+web/certs/
+
+# IDE
+.vscode/
+.idea/
+
+# DevContainer
+.devcontainer/
+
+# Sistema
+.DS_Store
+Thumbs.db

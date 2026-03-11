@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Googol - Indexar URL</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/googolIcon.svg">
+    <link rel="stylesheet" href="/static/IndexLinkPage/indexLink.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/">
+                <img src="/static/assets/Googol.svg" alt="Googol" class="logo">
+            </a>
+        </div>
+        <nav class="site-navigation">
+            <a href="/index-link" class="nav-link active">Index Links</a>
+            <a href="/links-to" class="nav-link">Links to a Page</a>
+            <a href="/stats" class="nav-link">Statistics</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="search-section">
+            <h1 class="page-title">Indexar novo URL</h1>
+            <p class="page-subtitle">Adicione um URL para ser indexado pelo motor de pesquisa</p>
+            
+            <form class="url-form" action="/index-link" method="post">
+                <div class="input-wrapper">
+                    <i class="fas fa-plus input-icon"></i>
+                    <input 
+                        type="url" 
+                        name="url" 
+                        class="url-input" 
+                        placeholder="Introduza um URL (ex: https://exemplo.com)" 
+                        required
+                    >
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Feedback Message -->
+            {% if message %}
+            <div class="feedback {{ 'success' if success else 'error' }}">
+                {% if success %}
+                <i class="fas fa-check-circle"></i>
+                {% else %}
+                <i class="fas fa-times-circle"></i>
+                {% endif %}
+                {{ message }}
+            </div>
+            {% endif %}
+        </div>
+
+    </main>
+</body>
+
+</html>

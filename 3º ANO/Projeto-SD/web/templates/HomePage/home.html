@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+          content="width=device-width, 
+                   initial-scale=1.0">
+    <title> Googol </title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/googolIcon.svg">
+    <link rel="stylesheet" href="/static/HomePage/home.css">
+    <link rel="stylesheet" href=
+"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+</head>
+
+<body>
+
+    <nav class="site-navigation">
+        <div class="header-container">
+            <a href="/index-link" class="nav-link">
+                Index Links
+            </a>
+            <a href="/links-to" class="nav-link">
+                Links to a Page
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <img id="google_image" src="/static/assets/Googol.svg">
+        
+        <!-- Search Bar -->
+        <div class="search-bar-wrapper">
+            <div class="search-input-section">
+                <img src="https://media.geeksforgeeks.org/wp-content/uploads/20240122040847/search.png"
+                     alt="search-icon"
+                     class="gsb">
+                <input type="text" 
+                       id="search-input"
+                       placeholder="Search Googol or type a URL" 
+                       class="search-input">
+                <a href="/ai-mode" class="ai-mode-link" title="Modo de IA">
+                    <i class="fas fa-magic"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Buttons Section -->
+        <section class="buttons-section">
+            <a href="/stats" class="stats-link">
+                    Google Statistics
+            </a>
+            
+            
+        </section>
+
+        
+    </main>
+
+    <script>
+        function pesquisar() {
+            const query = document.getElementById('search-input').value.trim();
+            if (query) {
+                window.location.href = '/search?q=' + encodeURIComponent(query);
+            }
+        }
+        
+        document.getElementById('search-input').onkeypress = function(e) {
+            if (e.key === 'Enter') pesquisar();
+        };
+    </script>
+</body>
+
+</html>

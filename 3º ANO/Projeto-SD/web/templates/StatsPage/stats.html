@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Googol - Estatísticas</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/googolIcon.svg">
+    <link rel="stylesheet" href="/static/StatsPage/stats.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/">
+                <img src="/static/assets/Googol.svg" alt="Googol" class="logo">
+            </a>
+        </div>
+        <nav class="site-navigation">
+            <a href="/index-link" class="nav-link">Index Links</a>
+            <a href="/links-to" class="nav-link ">Links to a Page</a>
+            <a href="/stats" class="nav-link active">Statistics</a>
+        </nav>
+    </header>
+
+    <main class="container">
+
+        <div class="stats-grid">
+            <!-- Top Searches -->
+            <div class="stats-card">
+                <div class="card-header">
+                    <i class="fas fa-search"></i>
+                    <h2>Top 10 Pesquisas</h2>
+                </div>
+                <div class="card-content" id="top-searches">
+                    <p class="loading">A carregar...</p>
+                </div>
+            </div>
+
+            <!-- Active Barrels -->
+            <div class="stats-card">
+                <div class="card-header">
+                    <i class="fas fa-database"></i>
+                    <h2>Barrels Ativos</h2>
+                </div>
+                <div class="card-content" id="barrels-info">
+                    <p class="loading">A carregar...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let ws = null;
+        let reconnectAttempts = 0;
+        let currentBarrelCounts = {};
+
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
+
+            ws.onopen = function() {
+                reconnectAttempts = 0;
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                updateStats(data);
+            };
+
+            ws.onclose = function() {
+                if (reconnectAttempts < 10) {
+                    reconnectAttempts++;
+                    setTimeout(connect, 2000);
+                }
+            };
+
+            ws.onerror = function() {
+            };
+        }
+
+        function animateNumber(element, startValue, endValue, duration = 1000) {
+            if (startValue === endValue) return;
+            
+            const startTime = performance.now();
+            const difference = endValue - startValue;
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const easeProgress = progress < 0.5 
+                    ? 2 * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                
+                const currentValue = Math.round(startValue + (difference * easeProgress));
+                element.textContent = currentValue.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                } else {
+                    element.textContent = endValue.toLocaleString();
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
+        function updateStats(data) {
+            // Top Searches
+            const topSearchesEl = document.getElementById('top-searches');
+            const topSearches = data.top_searches || [];
+            
+            if (topSearches.length > 0) {
+                let html = '<ol class="search-list">';
+                topSearches.forEach((item, index) => {
+                    const maxCount = topSearches[0].count || 1;
+                    const width = Math.max(10, (item.count / maxCount) * 100);
+                    html += `
+                        <li class="search-item">
+                            <div class="search-info">
+                                <span class="search-rank">${index + 1}</span>
+                                <span class="search-query">${escapeHtml(item.query)}</span>
+                                <span class="search-count">${item.count}</span>
+                            </div>
+                            <div class="search-bar-bg">
+                                <div class="search-bar-fill" style="width: ${width}%"></div>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ol>';
+                topSearchesEl.innerHTML = html;
+            } else {
+                topSearchesEl.innerHTML = '<p class="empty">Nenhuma pesquisa registada.</p>';
+            }
+
+            // Barrels
+            const barrelsEl = document.getElementById('barrels-info');
+            const barrels = data.barrels || [];
+            
+            if (barrels.length > 0) {
+                const existingBarrels = document.querySelectorAll('.barrel-item');
+                const existingBarrelIds = new Set();
+                
+                existingBarrels.forEach(item => {
+                    const id = item.getAttribute('data-barrel-id');
+                    if (id) existingBarrelIds.add(id);
+                });
+                
+                let html = '<div class="barrels-list">';
+                barrels.forEach(barrel => {
+                    // Converter para milissegundos (avg_response_time está em segundos)
+                    const avgTime = ((barrel.avg_response_time || 0) * 1000).toFixed(2);
+                    const barrelId = barrel.barrel_id;
+                    const wordCount = barrel.indexed_words_count || 0;
+                    
+                    html += `
+                        <div class="barrel-item" data-barrel-id="${escapeHtml(barrelId)}">
+                            <div class="barrel-header">
+                                <i class="fas fa-server"></i>
+                                <span>${escapeHtml(barrelId)}</span>
+                            </div>
+                            <div class="barrel-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Palavras</span>
+                                    <span class="stat-value barrel-word-count" data-barrel="${escapeHtml(barrelId)}">${wordCount.toLocaleString()}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Tempo Médio</span>
+                                    <span class="stat-value">${avgTime}ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                const shouldAnimate = existingBarrelIds.size > 0;
+                barrelsEl.innerHTML = html;
+                
+                // Animar as contagens se já existiam barrels
+                if (shouldAnimate) {
+                    barrels.forEach(barrel => {
+                        const barrelId = barrel.barrel_id;
+                        const newCount = barrel.indexed_words_count || 0;
+                        const oldCount = currentBarrelCounts[barrelId] || newCount;
+                        
+                        const element = document.querySelector(`.barrel-word-count[data-barrel="${barrelId}"]`);
+                        if (element && oldCount !== newCount) {
+                            animateNumber(element, oldCount, newCount, 1000);
+                        }
+                        
+                        currentBarrelCounts[barrelId] = newCount;
+                    });
+                } else {
+                    // Primeira vez - apenas guardar os valores
+                    barrels.forEach(barrel => {
+                        currentBarrelCounts[barrel.barrel_id] = barrel.indexed_words_count || 0;
+                    });
+                }
+            } else {
+                barrelsEl.innerHTML = '<p class="empty">Nenhum barrel ativo.</p>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        connect();
+    </script>
+</body>
+</html>

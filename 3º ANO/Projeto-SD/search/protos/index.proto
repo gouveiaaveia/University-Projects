@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package index;
+
+// O serviço principal do Index
+service Index {
+
+    // --- MÉTODOS DA FILA (Chamados na Gateway) ---
+    rpc takeNext(google.protobuf.Empty) returns (TakeNextResponse);
+    rpc putNew(PutNewRequest) returns (google.protobuf.Empty);
+    // NOVO: Confirmação de processamento (Lease)
+    rpc AcknowledgeUrl(AcknowledgeUrlRequest) returns (google.protobuf.Empty);
+
+    // --- MÉTODOS DE LEITURA (Chamados na Gateway -> Barrel) ---
+    rpc searchWord(SearchWordRequest) returns (SearchWordResponse);
+    rpc searchListPages(SearchListPagesRequest) returns (SearchListPagesResponse);
+    rpc getStatistics(google.protobuf.Empty) returns (StatisticsResponse);
+
+    // NOVO: RPC de escrita de página (substitui indexWords)
+    rpc IndexPageData(IndexRequest) returns (IndexWordsResponse);
+    // NOVO: RPC de escrita de links (substitui addLinkToUrl)
+    rpc AddPageLinks(AddLinksRequest) returns (google.protobuf.Empty);
+
+
+    // --- MÉTODOS DE SERVICE DISCOVERY (Gateway e Barrel) ---
+    rpc RegisterBarrel(HeartbeatRequest) returns (google.protobuf.Empty);
+    rpc SendHeartbeat(HeartbeatRequest) returns (google.protobuf.Empty);
+    rpc GetActiveBarrels(google.protobuf.Empty) returns (BarrelListResponse);
+    
+    // --- MÉTODO DE SINCRONIZAÇÃO (Barrel -> Barrel) ---
+    // ALTERADO: Agora retorna um stream de chunks
+    rpc GetFullState(google.protobuf.Empty) returns (stream StateChunk);
+}
+
+// --- Definições de Mensagens (Fila) ---
+message PutNewRequest {
+    string url = 1;
+}
+
+message TakeNextResponse {
+    string url = 1;
+}
+
+message AcknowledgeUrlRequest {
+    string url = 1;
+}
+
+// --- Definições de Mensagens (Leitura/Pesquisa) ---
+message SearchWordRequest {
+    string word = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message SearchWordResponse {
+    repeated SearchResult results = 1;
+    int32 total_results = 2;
+    int32 current_page = 3;
+    bool has_more = 4;
+}
+
+message SearchResult {
+    string title = 1;
+    string url = 2;
+    string citation = 3;
+}
+
+message SearchListPagesRequest {
+    string url = 1;
+}
+
+message SearchListPagesResponse {
+    repeated string urls = 1;
+}
+
+// --- Definições de Mensagens (Estatísticas) ---
+message StatisticsResponse {
+    repeated SearchStat top_searches = 1;
+    repeated BarrelInfo barrels = 2;
+}
+
+message SearchStat {
+    string query = 1;
+    int32 count = 2;
+}
+
+message BarrelInfo {
+    string barrel_id = 1;
+    int32 indexed_words_count = 2;
+    double avg_response_time = 3;
+}
+
+// --- Definições de Mensagens (Escrita) ---
+
+// NOVO: Mensagem para IndexPageData
+message IndexRequest {
+    string url = 1;
+    string title = 2;
+    string citation = 3;
+    repeated string words = 4;
+}
+
+// NOVO: Mensagem para AddPageLinks
+message AddLinksRequest {
+    string source_url = 1;
+    repeated string target_links = 2;
+}
+
+// Mantido para compatibilidade de resposta
+message IndexWordsResponse {
+    int32 count = 1;
+}
+
+// --- Definições de Mensagens (Service Discovery) ---
+message HeartbeatRequest {
+    string barrel_address = 1;
+}
+
+message BarrelListResponse {
+    repeated string addresses = 1;
+}
+
+// NOVO: Mensagem para o stream de GetFullState
+message StateChunk {
+    enum DataType {
+        UNKNOWN = 0;
+        DOC_INFO = 1;
+        URL_TO_DOCID = 2;
+        WORD_TO_WORDID = 3;
+        WORDID_TO_WORD = 4;
+        LINKS_TO_DOCID = 5;
+        SEARCH_QUERIES = 6;
+        INDEX_CHUNK = 7; // O índice invertido, em partes
+        COUNTERS = 8;    // doc_id_counter, word_id_counter
+    }
+    DataType type = 1;
+    bytes chunk_data = 2; // dados serializados (pickle)
+}
